@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "984210473869",
+    "project_id": "nusantara-rasa",
+    "storage_bucket": "nusantara-rasa.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:984210473869:android:a6a2edb3acbb19c90cb3c4",
+        "android_client_info": {
+          "package_name": "com.example.flutter_application_1"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "984210473869-8o9iidki85pgv1uj92ef23uv569sq917.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDQI-MJd23LNtSWys0IDA_qxlBjhk6OW14"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "984210473869-4ko4aig21kkduptcqqtaokntrd0atoqd.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
