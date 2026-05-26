@@ -1,6 +1,5 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'food_detail_screen.dart';
 
 class ExploreScreen extends StatefulWidget {
@@ -1125,7 +1124,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                 top: Radius.circular(30),
               ),
               child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20), // Efek Blur
+                filter: ImageFilter.blur(sigmaX: 3.0, sigmaY: 3.0), // Efek Blur
                 child: Container(
                   padding: const EdgeInsets.all(32),
                   decoration: BoxDecoration(
@@ -1322,7 +1321,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(16),
                   child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                    filter: ImageFilter.blur(sigmaX: 3.0, sigmaY: 3.0),
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       decoration: BoxDecoration(
@@ -1391,7 +1390,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(20),
                         child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                          filter: ImageFilter.blur(sigmaX: 2.0, sigmaY: 2.0),
                           child: Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 20,
@@ -1445,69 +1444,26 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
             // --- GRID KARTU KACA ---
             Expanded(
-              child: StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance.collection('foods').snapshots(),
-                builder: (context, snapshot) {
-                  List<Map<String, String>> currentFoods = displayedFoods;
-
-                  if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
-                    final firebaseFoods = snapshot.data!.docs.map((doc) {
-                      final data = doc.data() as Map<String, dynamic>;
-                      return data.map((key, value) => MapEntry(key, value.toString()));
-                    }).toList();
-
-                    currentFoods = firebaseFoods.where((food) {
-                      final nameSafe = food['name']?.toLowerCase() ?? '';
-                      final daerahSafe = food['daerah']?.toLowerCase() ?? '';
-                      final kategoriSafe = food['kategori'] ?? '';
-
-                      final matchesSearch =
-                          nameSafe.contains(_searchQuery.toLowerCase()) ||
-                          daerahSafe.contains(_searchQuery.toLowerCase());
-                      final matchesCategory =
-                          _categories[_selectedCategoryIndex] == 'Semua' ||
-                          kategoriSafe == _categories[_selectedCategoryIndex];
-                      final matchesRegion =
-                          _selectedRegion == 'Semua Daerah' ||
-                          daerahSafe.contains(_selectedRegion.toLowerCase()) || 
-                          food['daerah'] == _selectedRegion;
-
-                      return matchesSearch && matchesCategory && matchesRegion;
-                    }).toList()..sort((a, b) {
-                      final nameA = a['name'] ?? '';
-                      final nameB = b['name'] ?? '';
-                      if (_selectedSort == 'A-Z') return nameA.compareTo(nameB);
-                      if (_selectedSort == 'Z-A') return nameB.compareTo(nameA);
-                      return 0;
-                    });
-                  }
-
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator(color: Color(0xFFA84A3B)));
-                  }
-
-                  return currentFoods.isEmpty
-                      ? _buildEmptyState()
-                      : GridView.builder(
-                          physics: const BouncingScrollPhysics(),
-                          padding: const EdgeInsets.only(
-                            left: 24,
-                            right: 24,
-                            bottom: 40,
+              child: displayedFoods.isEmpty
+                  ? _buildEmptyState()
+                  : GridView.builder(
+                      physics: const BouncingScrollPhysics(),
+                      padding: const EdgeInsets.only(
+                        left: 24,
+                        right: 24,
+                        bottom: 40,
+                      ),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 16,
+                            mainAxisSpacing: 16,
+                            childAspectRatio: 0.8,
                           ),
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                crossAxisSpacing: 16,
-                                mainAxisSpacing: 16,
-                                childAspectRatio: 0.8,
-                              ),
-                          itemCount: currentFoods.length,
-                          itemBuilder: (context, index) =>
-                              _buildGlassCard(currentFoods[index]),
-                        );
-                },
-              ),
+                      itemCount: displayedFoods.length,
+                      itemBuilder: (context, index) =>
+                          _buildGlassCard(displayedFoods[index]),
+                    ),
             ),
           ],
         ),
@@ -1562,7 +1518,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+          filter: ImageFilter.blur(sigmaX: 3.0, sigmaY: 3.0),
           child: Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(

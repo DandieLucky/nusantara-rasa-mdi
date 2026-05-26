@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'providers/app_provider.dart';
 import 'screens/home_screen.dart';
 import 'screens/explore_screen.dart';
@@ -7,18 +9,16 @@ import 'screens/map_screen.dart';
 import 'screens/favorite_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/chatbot_modal.dart';
-import 'screens/login_screen.dart'; // <-- Tambahan import halaman login
-import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
+import 'screens/login_screen.dart';
+import 'screens/admin_panel_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  try {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-  } catch (e) {
-    debugPrint("Firebase gagal diinisialisasi atau belum dikonfigurasi: $e");
+
+  // WAJIB: Inisialisasi SQLite FFI untuk Windows/Linux/macOS
+  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
   }
 
   runApp(
@@ -38,13 +38,12 @@ class NusantaraRasaApp extends StatelessWidget {
       title: 'Nusantara Rasa',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        // Mengubah background menjadi krem hangat sesuai desain Figma
         scaffoldBackgroundColor: const Color(0xFFFAF8F4),
-        primaryColor: const Color(0xFF8B322C), // Warna aksen merah bata
+        primaryColor: const Color(0xFF8B322C),
         appBarTheme: const AppBarTheme(
           backgroundColor: Color(0xFFFAF8F4),
           elevation: 0,
-          iconTheme: IconThemeData(color: Color(0xFF3E2723)), // Cokelat gelap
+          iconTheme: IconThemeData(color: Color(0xFF3E2723)),
           titleTextStyle: TextStyle(
             color: Color(0xFF3E2723),
             fontSize: 20,
@@ -52,20 +51,27 @@ class NusantaraRasaApp extends StatelessWidget {
           ),
         ),
       ),
-      // --- UBAH DI SINI: Aplikasi akan membuka LoginScreen pertama kali ---
       home: const LoginScreen(),
     );
   }
 }
 
 class MainWrapper extends StatelessWidget {
-  const MainWrapper({super.key});
+  final int userId;
+  final String userRole;
+  final String userName;
+
+  const MainWrapper({
+    super.key,
+    required this.userId,
+    required this.userRole,
+    required this.userName,
+  });
 
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<AppProvider>(context);
 
-    // Sekarang kita siapkan 5 slot halaman sesuai Figma
     final List<Widget> pages = [
       const HomeScreen(),
       const ExploreScreen(),
@@ -76,12 +82,12 @@ class MainWrapper extends StatelessWidget {
 
     return Stack(
       children: [
-        // --- 1. BACKGROUND UNIVERSAL UNTUK SEMUA HALAMAN ---
-        Container(color: const Color(0xFFF9F6F0)), // Krem dasar
+        // Background
+        Container(color: const Color(0xFFF9F6F0)),
         Opacity(
           opacity: 0.15,
           child: Image.asset(
-            'assets/images/bg_nusantara.jpg', // Motif batik
+            'assets/images/bg_nusantara.jpg',
             width: double.infinity,
             height: double.infinity,
             fit: BoxFit.cover,
@@ -91,24 +97,53 @@ class MainWrapper extends StatelessWidget {
           ),
         ),
 
-        // --- 2. KONTEN APLIKASI (SCAFFOLD TRANSPARAN) ---
+        // Content
         Scaffold(
-          backgroundColor: Colors
-              .transparent, // Wajib transparan agar background belakang terlihat
+          backgroundColor: Colors.transparent,
           body: pages[provider.currentIndex],
 
-          floatingActionButton: FloatingActionButton(
-            onPressed: () {
-              showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                backgroundColor: Colors.transparent,
-                builder: (context) => const ChatbotModal(),
-              );
-            },
-            backgroundColor: const Color(0xFFA84A3B),
-            elevation: 4,
-            child: const Icon(Icons.support_agent, color: Colors.white),
+          floatingActionButton: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Admin Panel Button (hanya muncul untuk admin)
+              if (userRole == 'admin')
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: FloatingActionButton.small(
+                    heroTag: 'admin_fab',
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              AdminPanelScreen(userId: userId),
+                        ),
+                      );
+                    },
+                    backgroundColor: const Color(0xFF3E2723),
+                    child: const Icon(
+                      Icons.admin_panel_settings,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                ),
+              // Chatbot Button
+              FloatingActionButton(
+                heroTag: 'chatbot_fab',
+                onPressed: () {
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (context) => const ChatbotModal(),
+                  );
+                },
+                backgroundColor: const Color(0xFFA84A3B),
+                elevation: 4,
+                child: const Icon(Icons.support_agent, color: Colors.white),
+              ),
+            ],
           ),
           floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
 

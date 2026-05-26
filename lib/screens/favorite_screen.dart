@@ -101,8 +101,8 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                   borderRadius: BorderRadius.circular(16),
                   child: BackdropFilter(
                     filter: ImageFilter.blur(
-                      sigmaX: 20,
-                      sigmaY: 20,
+                      sigmaX: 3.0,
+                      sigmaY: 3.0,
                     ), // Blur ditingkatkan
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -198,7 +198,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20), // Blur dinaikkan
+          filter: ImageFilter.blur(sigmaX: 3.0, sigmaY: 3.0), // Blur dinaikkan
           child: Container(
             decoration: BoxDecoration(
               // Gradasi khas kaca premium
